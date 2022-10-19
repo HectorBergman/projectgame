@@ -101,6 +101,7 @@ def wallcheck(minX, minY, maxX, maxY):
             
 menuoptions = ["start", "instructions", "help"]              
 def mainmenu():
+    print(imagesbattle["prison"])
     print(imagesbattle["menutext"])
     print("""Type one:
 """)
@@ -190,10 +191,9 @@ def render():
 
 #battle("Medusa", 100, 10, "Medusa", 3, 2)
 
-print(render())
-mapicon["rm4"] = "hej"
-print(render())
 mainmenu()
 
     
+
+
 
