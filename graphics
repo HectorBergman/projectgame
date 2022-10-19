@@ -1,0 +1,55 @@
+imagesbattle= {"officer":rf"""
+           ________________
+           \      __      /         __
+            \_____()_____/         /  )
+            '============`        /  /
+             #---\  /---#        /  /
+            (# @\| |/@  #)      /  /
+             \   (_)   /       /  /
+             |\ '---` /|      /  /
+     _______/ \\_____// \____/ o_|
+    /       \  /     \  /   / o_|
+   / |           o|        / o_| \
+  /  |  _____     |       / /   \ \
+ /   |  |===|    o|      / /\    \ \
+|    |   \@/      |     / /  \    \ \
+|    |___________o|__/----)   \    \/
+|    '              ||  --)    \     |
+|___________________||  --)     \    /
+     |           o|   ''''   |   \__/
+     |            |          |
+""",
+"menutext":rf"""
+                                                                     ,                                       
+                           :                                         Et                                      
+           .              t#,     L.                     ,;          E#t                         ,;        ,;
+          ;W             ;##W.    EW:        ,ft       f#i           E##t     j.               f#i       f#i 
+         f#E GEEEEEEEL  :#L:WE    E##;       t#E     .E#t            E#W#t    EW,            .E#t      .E#t  
+       .E#f  ,;;L#K;;. .KG  ,#D   E###t      t#E    i#W,             E#tfL.   E##j          i#W,      i#W,   
+      iWW;      t#E    EE    ;#f  E#fE#f     t#E   L#D.              E#t      E###D.       L#D.      L#D.    
+     L##Lffi    t#E   f#.     t#i E#t D#G    t#E :K#Wfff;         ,ffW#Dffj.  E#jG#W;    :K#Wfff;  :K#Wfff;  
+    tLLG##L     t#E   :#G     GK  E#t  f#E.  t#E i##WLLLLt         ;LW#ELLLf. E#t t##f   i##WLLLLt i##WLLLLt 
+      ,W#i      t#E    ;#L   LW.  E#t   t#K: t#E  .E#L               E#t      E#t  :K#E:  .E#L      .E#L     
+     j#E.       t#E     t#f f#:   E#t    ;#W,t#E    f#E:             E#t      E#KDDDD###i   f#E:      f#E:   
+   .D#j         t#E      f#D#;    E#t     :K#D#E     ,WW;            E#t      E#f,t#Wi,,,    ,WW;      ,WW;  
+  ,WK,          t#E       G#t     E#t      .E##E      .D#;           E#t      E#t  ;#W:       .D#;      .D#; 
+  EG.            fE        t      ..         G#E        tt           E#t      DWi   ,KK:        tt        tt 
+  ,               :                           fE                     ;#t                                     
+                                               ,                      :;
+"""}
+print(imagesbattle["officer"])
+
+def img(pic):
+    print(images[f"{pic}"])
+    
+# ___________________
+#|   |   |   |   |   |
+#|___|___|___|___|___|
+#|   |   |   |   |   |
+#|___|___|___|___|___|
+#|   |   |   |   |   |
+#|___|___|___|___|___|
+#|   |   |   |   |   |
+#|___|___|___|___|___|
+#|   |   |   |   |   |
+#|___|___|___|___|___|
