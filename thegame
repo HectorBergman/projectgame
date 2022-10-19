@@ -1,0 +1,199 @@
+from random import randint
+from imagescode2 import imagesbattle
+mapicon = {"rm1":"you", "rm2":"hi ", "rm3": "rm3", "rm4": "cop"}
+gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Fish","eHlike":3,"eHlim":3}
+images = {"fish":f"   _\n ><_>", "Medusa":f"                   ,--.\n          ,--.  .--,`) )  .--,\n       .--,`) \\( (` /,--./ (`\n      ( ( ,--.  ) )\\ /`) ).--,-.\n       ;.__`) )/ /) ) ( (( (`_) )\n      ( (  / /( (.' \"-.) )) )__.'-,\n     _,--.( ( /`         `,/ ,--,) )\n    ( (``) \\,` ==.    .==  \\( (`,-;\n     ;-,( (_) ~6~ \\  / ~6~ (_) )_) )\n    ( (_ \\_ (      )(      )__/___.\'\n    '.__,-,\ \     ''     /\ ,-.\n       ( (_/ /\\    __    /\\ \\_) )\n        '._.'  \\  \\__/  /  '._.'\n            .--`\\      /`--.\n                 '----' ", "trollsign":f"       ,/`|;V\\.;\n     ,\\;`~\\,;\\;`\\, \n    /;|\\_|,\\~/`,\\/;,\n   `\\`/;`\\,`;`|;\\`\\'\n   ;|V`,;'|'/'`/'/|\\\n   `/;'|`\\V'/;\\,\\_V/\n    `;|\\, |;`,_|_,'\n       `,`\\_\\/;'\n          \\;`/     _____________\n         \\\\| |    |  WARNING!   |\n        _oo| |    |TROLLS HERE! |\n        `\\.| |    |_____________|\n ---....__/  `\\,____  |    |\n      _,-'     `-   ""|---.|...", "troll":f"             ,      ,\n            /(.-""-.)\\\n        |\\  \\/      \\/  /|\n        | \\ / =.  .= \\ / |\n        \\( \\   o\\/o   / )/\n         \\_, '-/  \\-' ,_/\n           /   \\__/   \\\n           \\ \\__/\\__/ /\n         ___\\ \\|--|/ /___\n       /`    \\      /    `\\\n      /       '----'       \\"}
+#fish, Medusa, trollsign
+action = ["hit", "check"]
+actionwalk = ["walk", "walk left", "walk forward", "walk right", "walk back", "left", "forward", "right", "back", "check", "look","help"]
+locations = ["forest"]
+room = {0:"forest"}
+coordinate={"xcoord":0,"ycoord":0}
+#Gamestate keeps track of who's turn it is, the player and the enemy's HP, dmg, etc.
+#Images is a gallery of all images which will be displayedlim
+#Action is a list of all available actions, and can/will be updated whenever necessary, either adding or removing an action
+def img(pic):
+    print(images[f"{pic}"])
+
+def overworld():
+    print("placeholder")
+def walk(startX, startY, minX, minY, maxX, maxY, location):
+    coordinate["xcoord"] = startX
+    coordinate["ycoord"] = startY
+    while True:
+        wallcheck(minX, minY, maxX, maxY)
+        s = input().lower()
+        if s == "stop":
+            return "hej"
+        if s in actionwalk:
+            if s == actionwalk[0]:
+                print("Specify direction: left, right, forward, back...?")
+            if s == actionwalk[1] or s == actionwalk[5]:
+                print("You walk left...")
+                coordinate["xcoord"] = coordinate["xcoord"] - 1
+            if s == actionwalk[2] or s == actionwalk[6]:
+                print("You walk forward...")
+                coordinate["ycoord"] = coordinate["ycoord"] + 1
+            if s == actionwalk[3] or s == actionwalk[7]:
+                print("You walk right...")
+                coordinate["xcoord"] = coordinate["xcoord"] + 1
+            if s == actionwalk[4] or s == actionwalk[8]:
+                print("You take a step back...")
+                coordinate["ycoord"] = coordinate["ycoord"] - 1
+            if s == actionwalk[9] or s == actionwalk[10]:
+                print(f"You look around...")
+                if location == room[0]:
+                    locationcheck = randint(0,5)
+                    if locationcheck == 0:
+                        print(images["trollsign"])  
+                        print("Be careful of trolls...")
+                    
+            if s == actionwalk[11]:
+                print(actionwalk)
+            encounterchance = randint(0,7)
+            if encounterchance == 5:
+                battle("Medusa", 100, 10, "Medusa", 3, 2,"random")
+                
+            else:
+                pass
+        else:
+            print("You can't do that...")
+
+        
+#Checks if the player is against a wall
+def wallcheck(minX, minY, maxX, maxY): 
+    if coordinate["xcoord"] == maxX: 
+        actionwalk[3] = None
+        actionwalk[7] = None
+    if coordinate["xcoord"] != maxX:
+        if "right" in actionwalk:
+            pass
+        else:
+            actionwalk[3] = "walk right"
+            actionwalk[7] = "right"
+    if coordinate["xcoord"] == minX: 
+        actionwalk[1] = None
+        actionwalk[5] = None
+    if coordinate["xcoord"] != minX:
+        if "left" in actionwalk:
+            pass
+        else:
+            actionwalk[1] = "walk left"
+            actionwalk[5] = "left"
+    if coordinate["ycoord"] == minY: 
+        actionwalk[4] = None
+        actionwalk[8] = None
+    if coordinate["ycoord"] != minY:
+        if "back" in actionwalk:
+            pass
+        else:
+            actionwalk[4] = "walk back"
+            actionwalk[8] = "back"
+    if coordinate["ycoord"] == maxY: 
+        actionwalk[2] = None
+        actionwalk[6] = None
+    if coordinate["ycoord"] != maxY:
+        if "forward" in actionwalk:
+            pass
+        else:
+            actionwalk[2] = "walk forward"
+            actionwalk[6] = "forward"
+            
+menuoptions = ["start", "instructions", "help"]              
+def mainmenu():
+    print(imagesbattle["menutext"])
+    print("""Type one:
+""")
+    for x in menuoptions:
+        if x != "help":
+            print(f"{x.capitalize()}")
+    while True:
+        s = input().lower()
+        if s in menuoptions:
+            if s == menuoptions[0]:
+                print("HEJ")
+                #start and shit
+            if s == menuoptions[1] or s == menuoptions[2]:
+                instructions()
+    else:
+        print("You can't do that.")
+
+def instructions():
+    print("Here are the instructions:")
+        
+def battle(name, hp, dmg, image, eHlike, eHlim, randomplanned):   
+    gamestate["ehp"]= hp
+    gamestate["edmg"] = dmg
+    gamestate["display"] = image
+    img(image)
+    if randomplanned == "random":
+        print(f"{name} appeared!")
+    while gamestate["battle"] == 1:
+        while gamestate["your_turn"] == 1:  #Din tur
+            if gamestate["ehp"] > 0 and gamestate["php"] > 0 :
+                s = input().lower()
+                if s == action[0]:
+                    hit()
+                elif s == action[1]:
+                    check(image)
+                else:
+                    print(f"You can't do that.")
+            elif gamestate["ehp"] <= 0:
+                print(f"{name} died!")
+                return None
+            else:
+                print("You died!")
+                return None
+        while gamestate["your_turn"] == 0:  #Motståndarens tur
+            if gamestate["php"] > 0 and gamestate["ehp"] > 0:
+                ehit(name, eHlike, eHlim) 
+            elif gamestate["ehp"] <= 0:
+                print(f"{name} died!")
+                return None
+            else:
+                print("You died!")
+                return None
+#Player actions below
+def hpcheck():
+    print ("You:", gamestate["php"], "hp")
+    print (gamestate["display"], ":", gamestate["ehp"], "hp")
+def check(image):
+    img(image)
+    hpcheck()
+    if gamestate["display"] == "Medusa":
+        print(f"Medusa turned you into stone!")
+        gamestate["your_turn"] = 0
+def hit():
+    print(f"You hit")
+    gamestate["ehp"] = gamestate["ehp"]- gamestate["pdmg"] * (randint(10,20) / randint(5,15))
+    gamestate["your_turn"] = 0
+#Enemy Actions Below:
+def ehit(name, hitlikelihood, hitlimit): 
+    hitattempt = randint(0,hitlikelihood)
+    if hitattempt >= hitlimit:
+        print(f"{name} missed!")
+        gamestate["your_turn"] = 1
+    else:
+        gamestate["php"] = gamestate["php"] - (gamestate["edmg"] + randint(10,40))
+        print(f"{name} swings!")
+        gamestate["your_turn"] = 1
+        
+def render():
+    return f"""
+ _______
+|{mapicon["rm4"]}|{mapicon["rm3"]}|
+|___|___|
+|{mapicon["rm2"]}|{mapicon["rm1"]}|
+|___|___|
+
+"""
+
+#battle("Medusa", 100, 10, "Medusa", 3, 2)
+
+print(render())
+mapicon["rm4"] = "hej"
+print(render())
+mainmenu()
+
+    
+
