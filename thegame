@@ -1,25 +1,26 @@
 from random import randint
 from imagescode2 import imagesbattle
-mapicon = {"rm1":"you", "rm2":"hi ", "rm3": "rm3", "rm4": "cop"}
-gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Fish","eHlike":3,"eHlim":3}
+mapicon = {"rm1":"you", "rm2":"hi ", "rm3": "rm3", "rm4": "cop", "rm5": "   ","rm6": "   ","rm7": "   ","rm8": "   ","rm9": "   ","rm10": "   ","rm11": "   ","rm12": "   ","rm13": "   "}
+gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Fish","eHlike":3,"eHlim":3,"victory":0,"mass":0}
 images = {"fish":f"   _\n ><_>", "Medusa":f"                   ,--.\n          ,--.  .--,`) )  .--,\n       .--,`) \\( (` /,--./ (`\n      ( ( ,--.  ) )\\ /`) ).--,-.\n       ;.__`) )/ /) ) ( (( (`_) )\n      ( (  / /( (.' \"-.) )) )__.'-,\n     _,--.( ( /`         `,/ ,--,) )\n    ( (``) \\,` ==.    .==  \\( (`,-;\n     ;-,( (_) ~6~ \\  / ~6~ (_) )_) )\n    ( (_ \\_ (      )(      )__/___.\'\n    '.__,-,\ \     ''     /\ ,-.\n       ( (_/ /\\    __    /\\ \\_) )\n        '._.'  \\  \\__/  /  '._.'\n            .--`\\      /`--.\n                 '----' ", "trollsign":f"       ,/`|;V\\.;\n     ,\\;`~\\,;\\;`\\, \n    /;|\\_|,\\~/`,\\/;,\n   `\\`/;`\\,`;`|;\\`\\'\n   ;|V`,;'|'/'`/'/|\\\n   `/;'|`\\V'/;\\,\\_V/\n    `;|\\, |;`,_|_,'\n       `,`\\_\\/;'\n          \\;`/     _____________\n         \\\\| |    |  WARNING!   |\n        _oo| |    |TROLLS HERE! |\n        `\\.| |    |_____________|\n ---....__/  `\\,____  |    |\n      _,-'     `-   ""|---.|...", "troll":f"             ,      ,\n            /(.-""-.)\\\n        |\\  \\/      \\/  /|\n        | \\ / =.  .= \\ / |\n        \\( \\   o\\/o   / )/\n         \\_, '-/  \\-' ,_/\n           /   \\__/   \\\n           \\ \\__/\\__/ /\n         ___\\ \\|--|/ /___\n       /`    \\      /    `\\\n      /       '----'       \\"}
 #fish, Medusa, trollsign
 action = ["hit", "check"]
-actionwalk = ["walk", "walk left", "walk forward", "walk right", "walk back", "left", "forward", "right", "back", "check", "look","help"]
+actionwalk = ["walk", "walk left", "walk forward", "walk right", "walk back", "left", "forward", "right", "back", "check", "look","map", "help"]
 locations = ["forest"]
-room = {0:"forest"}
+floor = {2:"cell"}
 coordinate={"xcoord":0,"ycoord":0}
 #Gamestate keeps track of who's turn it is, the player and the enemy's HP, dmg, etc.
 #Images is a gallery of all images which will be displayedlim
 #Action is a list of all available actions, and can/will be updated whenever necessary, either adding or removing an action
 def img(pic):
-    print(images[f"{pic}"])
+    print(imagesbattle[f"{pic}"])
 
 def overworld():
     print("placeholder")
-def walk(startX, startY, minX, minY, maxX, maxY, location):
+def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
     coordinate["xcoord"] = startX
     coordinate["ycoord"] = startY
+    mass = 0
     while True:
         wallcheck(minX, minY, maxX, maxY)
         s = input().lower()
@@ -30,35 +31,51 @@ def walk(startX, startY, minX, minY, maxX, maxY, location):
                 print("Specify direction: left, right, forward, back...?")
             if s == actionwalk[1] or s == actionwalk[5]:
                 print("You walk left...")
+                mapicon[f"rm{currentroom + 1}"] = "you"
+                mapicon[f"rm{currentroom}"] = "   "
+                currentroom = currentroom + 1
                 coordinate["xcoord"] = coordinate["xcoord"] - 1
             if s == actionwalk[2] or s == actionwalk[6]:
                 print("You walk forward...")
                 coordinate["ycoord"] = coordinate["ycoord"] + 1
+                mapicon[f"rm{currentroom+floor}"] = "you"
+                mapicon[f"rm{currentroom}"] = "   "
+                currentroom = currentroom + floor
             if s == actionwalk[3] or s == actionwalk[7]:
                 print("You walk right...")
                 coordinate["xcoord"] = coordinate["xcoord"] + 1
+                mapicon[f"rm{currentroom - 1}"] = "you"
+                mapicon[f"rm{currentroom}"] = "   "
+                currentroom = currentroom - 1
             if s == actionwalk[4] or s == actionwalk[8]:
                 print("You take a step back...")
                 coordinate["ycoord"] = coordinate["ycoord"] - 1
+                mapicon[f"rm{currentroom - floor}"] = "you"
+                mapicon[f"rm{currentroom}"] = "   "
+                currentroom = currentroom - floor
             if s == actionwalk[9] or s == actionwalk[10]:
                 print(f"You look around...")
-                if location == room[0]:
-                    locationcheck = randint(0,5)
-                    if locationcheck == 0:
-                        print(images["trollsign"])  
-                        print("Be careful of trolls...")
-                    
             if s == actionwalk[11]:
+                print(render(floor))
+                    
+            if s == actionwalk[-1]:
                 print(actionwalk)
-            encounterchance = randint(0,7)
-            if encounterchance == 5:
-                battle("Medusa", 100, 10, "Medusa", 3, 2,"random")
-                
             else:
-                pass
+                pass #In case s is in actionwalk but not an action. Example: "hel"   
+            #encounterchance = randint(0,7)
+            #if encounterchance == 5:
+                #battle("Medusa", 100, 10, "Medusa", 3, 2,"random")
+                #print("random encounter shit")
+            
         else:
             print("You can't do that...")
-
+            print(gamestate["mass"])
+        if currentroom == ((floor * floor) + gamestate["mass"]): #This checks if you're in the top left corner of the map to initiate bossfight, but for now it only takes you to the next floor, mass is the number of floors present on the previous floor.
+            floor = floor + 1
+            gamestate["mass"] = gamestate["mass"] + currentroom
+            currentroom = currentroom + 1
+            mapicon[f"rm{currentroom}"] = "you"
+            walk(0,0,-floor+1,0,0,floor-1,currentroom,floor)
         
 #Checks if the player is against a wall
 def wallcheck(minX, minY, maxX, maxY): 
@@ -108,11 +125,14 @@ def mainmenu():
     for x in menuoptions:
         if x != "help":
             print(f"{x.capitalize()}")
-    while True:
+    h = 1
+    while h == 1:
         s = input().lower()
         if s in menuoptions:
             if s == menuoptions[0]:
-                print("HEJ")
+                h = 0
+                walk(0,0,-1,0,0,1,1,2)
+                
                 #start and shit
             if s == menuoptions[1] or s == menuoptions[2]:
                 instructions()
@@ -141,19 +161,19 @@ def battle(name, hp, dmg, image, eHlike, eHlim, randomplanned):
                     print(f"You can't do that.")
             elif gamestate["ehp"] <= 0:
                 print(f"{name} died!")
-                return None
+                gamestate["victory"] = 1
             else:
                 print("You died!")
-                return None
+                gamestate["victory"] = 0
         while gamestate["your_turn"] == 0:  #Motståndarens tur
             if gamestate["php"] > 0 and gamestate["ehp"] > 0:
                 ehit(name, eHlike, eHlim) 
             elif gamestate["ehp"] <= 0:
                 print(f"{name} died!")
-                return None
+                gamestate["victory"] = 1
             else:
                 print("You died!")
-                return None
+                gamestate["victory"] = 0
 #Player actions below
 def hpcheck():
     print ("You:", gamestate["php"], "hp")
@@ -179,8 +199,9 @@ def ehit(name, hitlikelihood, hitlimit):
         print(f"{name} swings!")
         gamestate["your_turn"] = 1
         
-def render():
-    return f"""
+def render(floor):
+    if floor == 2:
+        return f"""
  _______
 |{mapicon["rm4"]}|{mapicon["rm3"]}|
 |___|___|
@@ -188,12 +209,24 @@ def render():
 |___|___|
 
 """
+    if floor == 3:
+        return f"""
+ ___________
+|{mapicon["rm13"]}|{mapicon["rm12"]}|{mapicon["rm11"]}|
+|___|___|___|
+|{mapicon["rm10"]}|{mapicon["rm9"]}|{mapicon["rm8"]}|
+|___|___|___|
+|{mapicon["rm7"]}|{mapicon["rm6"]}|{mapicon["rm5"]}|
+|___|___|___|
+
+"""
+    else:
+        return f"There is no map..."
+        
 
 #battle("Medusa", 100, 10, "Medusa", 3, 2)
 
 mainmenu()
 
     
-
-
 
