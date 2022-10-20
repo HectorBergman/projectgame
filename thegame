@@ -1,9 +1,8 @@
 from random import randint
 from imagescode2 import imagesbattle
+import time
 mapicon = {"rm1":"you", "rm2":"hi ", "rm3": "rm3", "rm4": "cop", "rm5": "   ","rm6": "   ","rm7": "   ","rm8": "   ","rm9": "   ","rm10": "   ","rm11": "   ","rm12": "   ","rm13": "   "}
-gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Fish","eHlike":3,"eHlim":3,"victory":0,"mass":0}
-images = {"fish":f"   _\n ><_>", "Medusa":f"                   ,--.\n          ,--.  .--,`) )  .--,\n       .--,`) \\( (` /,--./ (`\n      ( ( ,--.  ) )\\ /`) ).--,-.\n       ;.__`) )/ /) ) ( (( (`_) )\n      ( (  / /( (.' \"-.) )) )__.'-,\n     _,--.( ( /`         `,/ ,--,) )\n    ( (``) \\,` ==.    .==  \\( (`,-;\n     ;-,( (_) ~6~ \\  / ~6~ (_) )_) )\n    ( (_ \\_ (      )(      )__/___.\'\n    '.__,-,\ \     ''     /\ ,-.\n       ( (_/ /\\    __    /\\ \\_) )\n        '._.'  \\  \\__/  /  '._.'\n            .--`\\      /`--.\n                 '----' ", "trollsign":f"       ,/`|;V\\.;\n     ,\\;`~\\,;\\;`\\, \n    /;|\\_|,\\~/`,\\/;,\n   `\\`/;`\\,`;`|;\\`\\'\n   ;|V`,;'|'/'`/'/|\\\n   `/;'|`\\V'/;\\,\\_V/\n    `;|\\, |;`,_|_,'\n       `,`\\_\\/;'\n          \\;`/     _____________\n         \\\\| |    |  WARNING!   |\n        _oo| |    |TROLLS HERE! |\n        `\\.| |    |_____________|\n ---....__/  `\\,____  |    |\n      _,-'     `-   ""|---.|...", "troll":f"             ,      ,\n            /(.-""-.)\\\n        |\\  \\/      \\/  /|\n        | \\ / =.  .= \\ / |\n        \\( \\   o\\/o   / )/\n         \\_, '-/  \\-' ,_/\n           /   \\__/   \\\n           \\ \\__/\\__/ /\n         ___\\ \\|--|/ /___\n       /`    \\      /    `\\\n      /       '----'       \\"}
-#fish, Medusa, trollsign
+gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Enemy","eHlike":3,"eHlim":3,"victory":0,"mass":0,"cigarettes":0}
 action = ["hit", "check"]
 actionwalk = ["walk", "walk left", "walk forward", "walk right", "walk back", "left", "forward", "right", "back", "check", "look","map", "help"]
 locations = ["forest"]
@@ -14,7 +13,54 @@ coordinate={"xcoord":0,"ycoord":0}
 #Action is a list of all available actions, and can/will be updated whenever necessary, either adding or removing an action
 def img(pic):
     print(imagesbattle[f"{pic}"])
-
+def introsequence():
+    print("\n\nI hereby sentence you to life in prison without the possibility of parole!")
+    img("gavel")
+    time.sleep(4)
+    print("...")
+    time.sleep(2)
+    img("behindbars")
+    print("Life sentence... I'm way too young!")
+    time.sleep(2)
+    print("I have to get out of here, no way I'm wasting away in here!")
+    time.sleep(2)
+    print("\nMove around by typing 'left', 'right', 'forward', or 'back'")
+    time.sleep(1)
+    print("Type 'map' to see your current location and 'help' to get a list of all available commands.")
+    walk(0,0,-1,0,0,1,1,2)
+def prisonercutscene():
+    img("prisoner")
+    print("Psst... new kid...")
+    time.sleep(3)
+    print("You wanna break out of here, right?")
+    time.sleep(3)
+    print("Well I can help you with that...")
+    time.sleep(3)
+    img("mchappy")
+    print("Wait, really?")
+    time.sleep(2)
+    img("prisoner")
+    print("Sure, but it'll cost ya...")
+    time.sleep(3)
+    img("mcsuspicious")
+    print("How much...")
+    time.sleep(2.5)
+    img("prisoner")
+    print(f"Give me {gamestate['cigarettes']+1} cigarettes and I'll help you")
+    time.sleep(2)
+    print("...")
+    time.sleep(1)
+    print(f"You have {gamestate['cigarettes']}...")
+    time.sleep(1)
+    img("mcneutral")
+    print("I don't have them man, sorry.")
+    time.sleep(2)
+    img("prisoner")
+    print("Quit lying man I know you've got it")
+    time.sleep(2)
+    print("...")
+    time.sleep(2)
+    print("Fine, I guess I'll have to take them from you!")
 def overworld():
     print("placeholder")
 def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
@@ -69,8 +115,13 @@ def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
             
         else:
             print("You can't do that...")
-            print(gamestate["mass"])
         if currentroom == ((floor * floor) + gamestate["mass"]): #This checks if you're in the top left corner of the map to initiate bossfight, but for now it only takes you to the next floor, mass is the number of floors present on the previous floor.
+            if floor == 2:
+                prisonercutscene()
+                
+                
+                
+                
             floor = floor + 1
             gamestate["mass"] = gamestate["mass"] + currentroom
             currentroom = currentroom + 1
@@ -131,13 +182,13 @@ def mainmenu():
         if s in menuoptions:
             if s == menuoptions[0]:
                 h = 0
-                walk(0,0,-1,0,0,1,1,2)
+                introsequence()
                 
                 #start and shit
             if s == menuoptions[1] or s == menuoptions[2]:
                 instructions()
-    else:
-        print("You can't do that.")
+        else:
+            print("You can't do that.")
 
 def instructions():
     print("Here are the instructions:")
