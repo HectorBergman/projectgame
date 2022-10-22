@@ -1,0 +1,81 @@
+# X och Y motsvarar stoleken på spelbrädet
+X = 11
+Y = 10
+
+# Possible diraction
+LEFT, RIGHT, FORWARD, BACKWARD = 1, 2, 3, 4
+
+
+# Print the directions menu
+def diraction_meny():
+    diractions = {'1': 'left', '2': 'right', '3': 'farward', '4': 'backward'}
+
+    print('\nYou have only 4 chices: ')
+    for diraction in diractions:
+        print(f'{diraction}  ) {diractions[diraction]}')
+    print()
+
+
+# Create a 2-dimensional array
+def gameBoard():
+    board = [[0 for rad in range(X)] for kolumn in range(Y)]
+    return board
+
+
+# Draw the board of the game
+def drawBoard(board):
+    print("+---" * X + "+")
+    for rad in board:
+        for kolumn in rad:
+            if kolumn == 1:
+                print("| X ", end="")
+            else:
+                print("|   ", end="")
+        print(f"|   ")
+        print("+---" * X + "+")
+
+
+# Select a coordinate for a given X and Y value, 1 corresponds to user.
+def select_coord(board, x, y):
+    board[y][x] = 1
+    return board
+
+
+# Unselect a coordinate for a given X and Y value, 0 corresponds to empty.
+def unselect_coord(board, x, y):
+    board[y][x] = 0
+    return board
+
+
+# move the user in the board of the game
+def movments():
+    board = gameBoard()
+    gameover = False
+    x_dir = 5
+    y_dir = 9
+
+    board = select_coord(board, x_dir, y_dir)
+    drawBoard(board)
+    diraction_meny()
+
+    while not gameover:
+        board = unselect_coord(board, x_dir, y_dir)
+
+        diraction = int(input('Chose your diraction: '))
+
+        if diraction == LEFT:
+            x_dir -= 1
+        elif diraction == RIGHT:
+            x_dir += 1
+        elif diraction == FORWARD:
+            y_dir -= 1
+        elif diraction == BACKWARD:
+            y_dir += 1
+
+        board = select_coord(board, x_dir, y_dir)
+
+        drawBoard(board)
+        diraction_meny()
+
+
+movments()
