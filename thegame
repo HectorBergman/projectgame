@@ -2,17 +2,40 @@ from random import randint
 from imagescode2 import imagesbattle
 import time
 mapicon = {"rm1":"you", "rm2":"hi ", "rm3": "rm3", "rm4": "cop", "rm5": "   ","rm6": "   ","rm7": "   ","rm8": "   ","rm9": "   ","rm10": "   ","rm11": "   ","rm12": "   ","rm13": "   "}
-gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Enemy","eHlike":3,"eHlim":3,"victory":0,"mass":0,"cigarettes":0}
+gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Enemy","eHlike":3,"eHlim":3,"victory":0,"mass":0,"cigarettes":0,"toothbrush":0}
 action = ["hit", "check"]
 actionwalk = ["walk", "walk left", "walk forward", "walk right", "walk back", "left", "forward", "right", "back", "check", "look","map", "help"]
 locations = ["forest"]
 floor = {2:"cell"}
+inventory = []
 coordinate={"xcoord":0,"ycoord":0}
 #Gamestate keeps track of who's turn it is, the player and the enemy's HP, dmg, etc.
 #Images is a gallery of all images which will be displayedlim
 #Action is a list of all available actions, and can/will be updated whenever necessary, either adding or removing an action
+def roomcheck(mass, room):
+    if room + mass == 2:
+        if gamestate["toothbrush"] == 0:
+            img("toothbrush")
+            print("This is your new bathroom...")
+            time.sleep(1)
+            s = input("Take a toothbrush? y/n \n")
+            while gamestate["toothbrush"] == 0:
+                if s == "y":
+                    img("toothbrushstolen")
+                    print("Added toothbrush to inventory")
+                    gamestate["toothbrush"] = 1
+                elif s == "n":
+                    print("You let the toothbrush be.")
+                    gamestate["toothbrush"] = 1
+                else:
+                    print("Type y or n...")
+
+            
+        
+        
+
 def img(pic):
-    print(imagesbattle[f"{pic}"])
+    print(imagesbattle[pic])
 def introsequence():
     print("\n\nI hereby sentence you to life in prison without the possibility of parole!")
     img("gavel")
@@ -46,7 +69,10 @@ def prisonercutscene():
     print("How much...")
     time.sleep(2.5)
     img("prisoner")
-    print(f"Give me {gamestate['cigarettes']+1} cigarettes and I'll help you")
+    if gamestate["cigarettes"] == 0:
+        print (f"Give me a cigarette and I'll help you")
+    else:
+        print(f"Give me {gamestate['cigarettes']+1} cigarettes and I'll help you")
     time.sleep(2)
     print("...")
     time.sleep(1)
@@ -115,10 +141,11 @@ def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
             
         else:
             print("You can't do that...")
+        roomcheck(mass, currentroom)
         if currentroom == ((floor * floor) + gamestate["mass"]): #This checks if you're in the top left corner of the map to initiate bossfight, but for now it only takes you to the next floor, mass is the number of floors present on the previous floor.
             if floor == 2:
                 prisonercutscene()
-                
+                battle("Prisoner Westwood", 100, 10, 'prisoner', 3, 2, 1)
                 
                 
                 
@@ -167,14 +194,14 @@ def wallcheck(minX, minY, maxX, maxY):
             actionwalk[2] = "walk forward"
             actionwalk[6] = "forward"
             
-menuoptions = ["start", "instructions", "help"]              
+menuoptions = ["start", "instructions", "help", "skipcutscene"]              
 def mainmenu():
     print(imagesbattle["prison"])
     print(imagesbattle["menutext"])
     print("""Type one:
 """)
     for x in menuoptions:
-        if x != "help":
+        if x != "help" and x != "skipcutscene":
             print(f"{x.capitalize()}")
     h = 1
     while h == 1:
@@ -187,19 +214,20 @@ def mainmenu():
                 #start and shit
             if s == menuoptions[1] or s == menuoptions[2]:
                 instructions()
+            if s == menuoptions[3]:
+                walk(0,0,-1,0,0,1,1,2)
         else:
             print("You can't do that.")
 
 def instructions():
     print("Here are the instructions:")
         
-def battle(name, hp, dmg, image, eHlike, eHlim, randomplanned):   
+def battle(name, hp, dmg, image, eHlike, eHlim, yourturn):   
     gamestate["ehp"]= hp
     gamestate["edmg"] = dmg
     gamestate["display"] = image
+    gamestate["your_turn"] = yourturn
     img(image)
-    if randomplanned == "random":
-        print(f"{name} appeared!")
     while gamestate["battle"] == 1:
         while gamestate["your_turn"] == 1:  #Din tur
             if gamestate["ehp"] > 0 and gamestate["php"] > 0 :
@@ -213,18 +241,26 @@ def battle(name, hp, dmg, image, eHlike, eHlim, randomplanned):
             elif gamestate["ehp"] <= 0:
                 print(f"{name} died!")
                 gamestate["victory"] = 1
+                gamestate["battle"] = 0
+                gamestate["your_turn"] = 2
             else:
                 print("You died!")
                 gamestate["victory"] = 0
+                gamestate["battle"] = 0
+                gamestate["your_turn"] = 2
         while gamestate["your_turn"] == 0:  #Motståndarens tur
             if gamestate["php"] > 0 and gamestate["ehp"] > 0:
                 ehit(name, eHlike, eHlim) 
             elif gamestate["ehp"] <= 0:
                 print(f"{name} died!")
                 gamestate["victory"] = 1
+                gamestate["battle"] = 0
+                gamestate["your_turn"] = 2
             else:
                 print("You died!")
                 gamestate["victory"] = 0
+                gamestate["battle"] = 0
+                gamestate["your_turn"] = 2
 #Player actions below
 def hpcheck():
     print ("You:", gamestate["php"], "hp")
