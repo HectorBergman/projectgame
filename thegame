@@ -2,15 +2,15 @@ from random import randint
 from imagescode2 import imagesbattle
 import time
 mapicon = {"rm1":"you", "rm2":"hi ", "rm3": "rm3", "rm4": "cop", "rm5": "   ","rm6": "   ","rm7": "   ","rm8": "   ","rm9": "   ","rm10": "   ","rm11": "   ","rm12": "   ","rm13": "   "}
-gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Enemy","eHlike":3,"eHlim":3,"victory":0,"mass":0,"cigarettes":0,"toothbrush":0}
+gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Enemy","eHlike":3,"eHlim":3,"victory":0,"mass":0,"cigarettes":0,"toothbrush":0,"inventoryopen":0}
 action = ["hit", "check"]
-actionwalk = ["walk", "walk left", "walk forward", "walk right", "walk back", "left", "forward", "right", "back", "check", "look","map", "help"]
+actionwalk = ["walk", "walk left", "walk forward", "walk right", "walk back", "left", "forward", "right", "back", "check", "look","map", "inventory", "inv", "help"]
 locations = ["forest"]
 floor = {2:"cell"}
-inventory = []
+inventory = {}
 coordinate={"xcoord":0,"ycoord":0}
 #Gamestate keeps track of who's turn it is, the player and the enemy's HP, dmg, etc.
-#Images is a gallery of all images which will be displayedlim
+#Images is a gallery of all images which will be displayed
 #Action is a list of all available actions, and can/will be updated whenever necessary, either adding or removing an action
 def roomcheck(mass, room):
     if room + mass == 2:
@@ -18,12 +18,15 @@ def roomcheck(mass, room):
             img("toothbrush")
             print("This is your new bathroom...")
             time.sleep(1)
-            s = input("Take a toothbrush? y/n \n")
+            print("Take a toothbrush? y/n")
             while gamestate["toothbrush"] == 0:
+                s = input().lower()
                 if s == "y":
                     img("toothbrushstolen")
-                    print("Added toothbrush to inventory")
+                    print("Added toothbrush to inventory. Open inventory by typing 'inventory' or 'inv'")
                     gamestate["toothbrush"] = 1
+                    inventory["toothbrush"] = "unequipped"
+                    inventory["testitem"] = "unequipped"
                 elif s == "n":
                     print("You let the toothbrush be.")
                     gamestate["toothbrush"] = 1
@@ -31,7 +34,44 @@ def roomcheck(mass, room):
                     print("Type y or n...")
 
             
+def bag():
+    gamestate["inventoryopen"] = 0
+    for x in inventory:
+        if inventory[x] == "equipped":
+            print(f"{x.capitalize()} EQUIPPED")
+        else:
+            print(x.capitalize())
+    if len(inventory) == 0:
+        print("You have no items...")
+    if gamestate["cigarettes"] == 1:
+        print(f"\nYou have 1 cigarette.")
+    else:
+        print(f"\nYou have {gamestate['cigarettes']} cigarettes.")
+    print("Do you want to equip something else? y/n")
+    while gamestate["inventoryopen"] == 0:
+        s = input().lower()
+        if s == "y":
+            print("Which item do you want to equip? Type 'cancel' to cancel.")
+            while gamestate["inventoryopen"] == 0:
+                d = input().lower()
+                if d == "cancel":
+                    print("You close your inventory.")
+                    gamestate["inventoryopen"] = 1
+                elif d in inventory:
+                    for x in inventory:
+                        inventory[x] = "unequipped"
+                    inventory[d] = "equipped"
+                    print(f"You equipped the {d.capitalize()}.")
+                    gamestate["inventoryopen"] = 1
+                else:
+                    print("That is not an item... Type 'cancel' to exit out of inventory.")
+        elif s == "n":
+            print("You close your inventory.")
+            gamestate["inventoryopen"] = 1
+        else:
+            print("Type y or n...")     
         
+    
         
 
 def img(pic):
@@ -129,7 +169,8 @@ def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
                 print(f"You look around...")
             if s == actionwalk[11]:
                 print(render(floor))
-                    
+            if s == actionwalk[12] or s == actionwalk[13]:
+                bag()
             if s == actionwalk[-1]:
                 print(actionwalk)
             else:
@@ -316,4 +357,6 @@ def render(floor):
 mainmenu()
 
     
+
+
 
