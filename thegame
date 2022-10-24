@@ -1,8 +1,8 @@
 from random import randint
 from imagescode2 import imagesbattle
 import time
-mapicon = {"rm1":"you", "rm2":"hi ", "rm3": "rm3", "rm4": "cop", "rm5": "   ","rm6": "   ","rm7": "   ","rm8": "   ","rm9": "   ","rm10": "   ","rm11": "   ","rm12": "   ","rm13": "   "}
-gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Enemy","eHlike":3,"eHlim":3,"victory":0,"mass":0,"cigarettes":0,"toothbrush":0,"inventoryopen":0}
+mapicon = {"rm1":"you", "rm2":"evt", "rm3": "   ", "rm4": "btl", "rm5": "   ","rm6": "   ","rm7": "   ","rm8": "   ","rm9": "   ","rm10": "   ","rm11": "   ","rm12": "   ","rm13": "   "}
+gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Enemy","eHlike":3,"eHlim":3,"victory":0,"mass":0,"cigarettes":0,"toothbrush":0,"inventoryopen":0, "mapcheck":0}
 action = ["hit", "check"]
 actionwalk = ["walk", "walk left", "walk forward", "walk right", "walk back", "left", "forward", "right", "back", "check", "look","map", "inventory", "inv", "help"]
 locations = ["forest"]
@@ -127,6 +127,31 @@ def prisonercutscene():
     print("...")
     time.sleep(2)
     print("Fine, I guess I'll have to take them from you!")
+    print("")
+    time.sleep(0.5)
+    print("")
+    time.sleep(1)
+    print("You're about to enter your first battle...")
+    time.sleep(1)
+    print("Currently you have no weapons, but that's okay! You can still use 'hit' and 'kick'")
+    time.sleep(2)
+    print("You can also type 'check' to see your current HP and the opponent's HP... Good luck!")
+    time.sleep(3)
+def prisonercutscene2():
+    time.sleep(1)
+    img("mcsurprise")
+    print("Oh... I knocked him unconcious...")
+    time.sleep(2)
+    img("keys")
+    print("Huh... he really did have a way out of here...")
+    time.sleep(2)
+    print("And 10 cigarettes... why was he so desperate...")
+    gamestate["cigarettes"] += 10
+    time.sleep(2)
+    img("mchappy")
+    print("I'm one step closer from getting out of here!")
+    time.sleep(2)
+    
 def overworld():
     print("placeholder")
 def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
@@ -168,7 +193,12 @@ def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
             if s == actionwalk[9] or s == actionwalk[10]:
                 print(f"You look around...")
             if s == actionwalk[11]:
-                print(render(floor))
+                if gamestate["mapcheck"] == 0:
+                    print("Here is your current map, 'you' is your position, 'btl' is a boss battle, and 'evt' is an optional event.")
+                    print(render(floor))
+                    gamestate["mapcheck"] = 1
+                else:
+                    print(render(floor))
             if s == actionwalk[12] or s == actionwalk[13]:
                 bag()
             if s == actionwalk[-1]:
@@ -187,6 +217,11 @@ def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
             if floor == 2:
                 prisonercutscene()
                 battle("Prisoner Westwood", 100, 10, 'prisoner', 3, 2, 1)
+                if gamestate["victory"] == 1:
+                    prisonercutscene2()
+                    print(f"You're now on the next level of the game...")
+                    render(3)
+                    
                 
                 
                 
@@ -269,6 +304,8 @@ def battle(name, hp, dmg, image, eHlike, eHlim, yourturn):
     gamestate["display"] = image
     gamestate["your_turn"] = yourturn
     img(image)
+    maxhp = hp
+    print(f"{name} attacks!")
     while gamestate["battle"] == 1:
         while gamestate["your_turn"] == 1:  #Din tur
             if gamestate["ehp"] > 0 and gamestate["php"] > 0 :
@@ -291,7 +328,13 @@ def battle(name, hp, dmg, image, eHlike, eHlim, yourturn):
                 gamestate["your_turn"] = 2
         while gamestate["your_turn"] == 0:  #Motståndarens tur
             if gamestate["php"] > 0 and gamestate["ehp"] > 0:
-                ehit(name, eHlike, eHlim) 
+                if name == "Prisoner Westwood":
+                    move = randint(0,4)
+                    if move == 0 or move == 1 or move == 2:
+                        ehit(name, eHlike, eHlim)
+                    if move == 4 or move == 3:
+                        gamestate["ehp"] = esmoke(name, hp, maxhp)
+                
             elif gamestate["ehp"] <= 0:
                 print(f"{name} died!")
                 gamestate["victory"] = 1
@@ -326,6 +369,17 @@ def ehit(name, hitlikelihood, hitlimit):
         gamestate["php"] = gamestate["php"] - (gamestate["edmg"] + randint(10,40))
         print(f"{name} swings!")
         gamestate["your_turn"] = 1
+def esmoke(name, hp, maxhp):
+    print(f"{name} lights a cigarette!")
+    time.sleep(1)
+    print(f"{name} heals 20 HP!")
+    gamestate["your_turn"] = 1
+    if maxhp >= hp + 20:
+        return hp + 20
+    else:
+        return maxhp
+    
+        
         
 def render(floor):
     if floor == 2:
@@ -357,6 +411,4 @@ def render(floor):
 mainmenu()
 
     
-
-
 
