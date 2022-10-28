@@ -1,12 +1,16 @@
 from random import randint
+import random
 from imagescode2 import imagesbattle
 import time
-mapicon = {"rm1":"you", "rm2":"evt", "rm3": "   ", "rm4": "btl", "rm5": "   ","rm6": "   ","rm7": "   ","rm8": "   ","rm9": "   ","rm10": "   ","rm11": "   ","rm12": "   ","rm13": "   "}
-gamestate = {"your_turn":1,"battle":1,"php":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Enemy","eHlike":3,"eHlim":3,"victory":0,"mass":0,"cigarettes":0,"toothbrush":0,"inventoryopen":0, "mapcheck":0}
-action = ["hit", "check"]
+mapicon = {"rm1":"you", "rm2":"evt", "rm3": "evt", "rm4": "btl", "rm5": "   ","rm6": "   ","rm7": "evt","rm8": "   ","rm9": "   ","rm10": "   ","rm11": "shp","rm12": "   ","rm13": "btl"}
+gamestate = {"your_turn":1,"battle":1,"php":100,"maxphp":100,"pdmg":10,"display":"fish","ehp":100,"edmg":10,"ename":"Enemy","eHlike":3,"eHlim":3,"victory":0,"mass":0,"cigarettes":0,"toothbrush":0,"inventoryopen":0, "mapcheck":0,"ramen":0,"mag":0}
+seenroom = {"bathroom":0, "cigarettepack":0, "store":0,"store2":0,"library":0}
+action = ["check", "jab", "kick", "hook", "diebitch", "help", "ramen", "mag"]
+actiondesc = {"jab":"A low-damage move with a chance to allow you to attack again.", "kick": "A low-to-medium-damage move with a low chance to deal near-fatal damage", "hook":"A high-damage move with higher rate of success when your opponent is at lower HP.", "check":"Checks you and your opponent's HP!"}
 actionwalk = ["walk", "walk left", "walk forward", "walk right", "walk back", "left", "forward", "right", "back", "check", "look","map", "inventory", "inv", "help"]
 locations = ["forest"]
 floor = {2:"cell"}
+stock = {"Ramen":5,"Magazine":10,"Lock in a sock":15}
 inventory = {}
 coordinate={"xcoord":0,"ycoord":0}
 #Gamestate keeps track of who's turn it is, the player and the enemy's HP, dmg, etc.
@@ -14,24 +18,77 @@ coordinate={"xcoord":0,"ycoord":0}
 #Action is a list of all available actions, and can/will be updated whenever necessary, either adding or removing an action
 def roomcheck(mass, room):
     if room + mass == 2:
-        if gamestate["toothbrush"] == 0:
+        if seenroom["bathroom"] == 0:
             img("toothbrush")
             print("This is your new bathroom...")
             time.sleep(1)
             print("Take a toothbrush? y/n")
-            while gamestate["toothbrush"] == 0:
+            while seenroom["bathroom"] == 0:
                 s = input().lower()
                 if s == "y":
                     img("toothbrushstolen")
                     print("Added toothbrush to inventory. Open inventory by typing 'inventory' or 'inv'")
                     gamestate["toothbrush"] = 1
                     inventory["toothbrush"] = "unequipped"
-                    inventory["testitem"] = "unequipped"
+                    seenroom["bathroom"] = 1
+                    return None
                 elif s == "n":
                     print("You let the toothbrush be.")
-                    gamestate["toothbrush"] = 1
+                    gamestate["toothbrush"] = 0
+                    seenroom["bathroom"] = 1
+                    return None
                 else:
                     print("Type y or n...")
+    if room + mass == 3:
+        if seenroom["cigarettepack"] == 0:
+            print(f"You find a pack of cigarettes by your bunkmate's bed...")
+            randcig = randint(8,14)
+            time.sleep(2)
+            print(f"There's {randcig} cigarettes in there...")
+            time.sleep(1.5)
+            print(f"He surely won't mind...")
+            time.sleep(1)
+            print(f"Gained {randcig} cigarettes...")
+            seenroom["cigarettepack"] = 1
+            time.sleep(1)
+            gamestate["cigarettes"] = gamestate["cigarettes"] + randcig
+    if room + mass == 7:
+        if seenroom["library"] == 0:
+            img("book")
+            print("While sneaking around, you find a book.")
+            time.sleep(1)
+            print("'Fighting for dummies', it reads.")
+            time.sleep(1)
+            print("While they're surely out looking for you right now, you also kind of want to read it...")
+            print("Read the book? y/n")
+            while seenroom["library"] == 0:
+                s = input().lower()
+                if s == "y":
+                    img("book")
+                    print("You read the book for a bit...")
+                    time.sleep(3)
+                    print("After reading for a little while, you feel you've gotten better at fighting... +2 dmg!")
+                    gamestate["pdmg"] = gamestate["pdmg"] + 2
+                    seenroom["library"] = 1
+                    return None
+                elif s == "n":
+                    print("No, you should focus on the task at hand...")
+                    seenroom["library"] = 1
+                    return None
+                else:
+                    print("Type y or n...")
+        else:
+            pass
+    if room + mass == 11:
+        if seenroom["store2"] == 0:
+            if seenroom["store"] == 0:
+                shopintro()
+            seenroom["store"] = 1
+            shop()
+        else:
+            pass
+    if room + mass == 12 or room + mass == 8:
+        seenroom["store2"] = 0
 
             
 def bag():
@@ -43,10 +100,19 @@ def bag():
             print(x.capitalize())
     if len(inventory) == 0:
         print("You have no items...")
-    if gamestate["cigarettes"] == 1:
-        print(f"\nYou have 1 cigarette.")
+    print()
+    if gamestate["mag"] == 0:
+        pass
     else:
-        print(f"\nYou have {gamestate['cigarettes']} cigarettes.")
+        print("You have the magazine...")
+    if gamestate["ramen"] == 0:
+        pass
+    else:
+        print(f"You have {gamestate['ramen']} blocks of ramen")
+    if gamestate["cigarettes"] == 1:
+        print(f"You have 1 cigarette.")
+    else:
+        print(f"You have {gamestate['cigarettes']} cigarettes.")
     print("Do you want to equip something else? y/n")
     while gamestate["inventoryopen"] == 0:
         s = input().lower()
@@ -133,9 +199,11 @@ def prisonercutscene():
     time.sleep(1)
     print("You're about to enter your first battle...")
     time.sleep(1)
-    print("Currently you have no weapons, but that's okay! You can still use 'hit' and 'kick'")
+    print("Currently you have no weapons, but that's okay! You can type 'jab', 'kick' and 'hook' to fight.")
     time.sleep(2)
-    print("You can also type 'check' to see your current HP and the opponent's HP... Good luck!")
+    print("You can also type 'check' to see your current HP and the opponent's HP...")
+    time.sleep(2)
+    print("Lastly you can type 'help' to see your available moves and what they do... Good luck!")
     time.sleep(3)
 def prisonercutscene2():
     time.sleep(1)
@@ -145,15 +213,167 @@ def prisonercutscene2():
     img("keys")
     print("Huh... he really did have a way out of here...")
     time.sleep(2)
-    print("And 10 cigarettes... why was he so desperate...")
-    gamestate["cigarettes"] += 10
+    print("And 15 cigarettes... why was he so desperate...")
+    gamestate["cigarettes"] += 15
     time.sleep(2)
     img("mchappy")
     print("I'm one step closer from getting out of here!")
     time.sleep(2)
+def shopintro():
+    print(f"Hey, guy, over here...")
+    time.sleep(1)
+    img("mcsuspicious")
+    print("Who's there?...")
+    time.sleep(2)
+    img("shopguyintro")
+    print("Relaaax, I'm not gonna hurt you.")
+    time.sleep(1)
+    print("I'm only interested in business...")
+    time.sleep(2)
+    img("mcneutral")
+    print("Business...?")
+    time.sleep(2)
+    img("shopguy")
+    print("Look, I don't care how you're out of your cell.")
+    time.sleep(1)
+    print("But if you've got the cigarettes, I've got the wares.")
+    time.sleep(2)
+    print("...")
+    time.sleep(1)
+    print("So we doing this or what?")
+    time.sleep(3)
+def guardcutscene():
+    img("officer")
+    print("STOP RIGHT THERE!")
+    time.sleep(1)
+    img("mcneutral")
+    print("Uh oh...")
+    time.sleep(2)
+    img("officer")
+    print("WHAT ARE YOU DOING OUTSIDE OF YOUR CELL?")
+    time.sleep(2)
+    img("mcsuspicious")
+    print("Uh...")
+    time.sleep(1)
+    img("mcneutral")
+    print("Chillin'")
+    time.sleep(1)
+    img("officer")
+    print("HANDS WHERE I CAN SEE THEM!")
+    time.sleep(1)
     
-def overworld():
-    print("placeholder")
+    
+def stonefree():
+    time.sleep(2)
+    print(f"Having taken care of Westwood, you grab his masterkey and quickly make your way to the exit")
+    time.sleep(2)
+    print("Once the coast seems clear, you escape the compound and hotwire the nearest car")
+    time.sleep(3)
+    img("carend")
+    time.sleep(2)
+    print("Relieved that you're finally...")
+    time.sleep(2)
+    img("menutext")
+    
+def shop():
+    shopguylines = ["You got the cigarettes?...", "You trynna buy something?", "Listen, I don't got all day...", "So what's it gonna be?"]
+    stockdesc = {"Ramen":"A staple in the prison economy. Of course, you don't trade with it, only eat it. Heals for 40 HP","Magazine":"Chance of stunning your opponents for two turns when used. That's definitely why you bought it.","Lock in a sock":"Tough to swing, but packs a punch. May stun your enemies, and can be thrown.","Sharpen toothbrush":"Everybody's got one, you're missing out! High damage, causes bleeding."}
+    shopguybyelines = ["Don't get caught out there! Or do, I don't care!", "Pleasure doing business with you.", "Come back anytime."]
+    t = 0
+    if seenroom["store"] == 0:
+        shopintro()
+    img("shopguy")
+    if gamestate["toothbrush"] == 1:
+        print("Hey, I see you're carrying a toothbrush...")
+        time.sleep(1)
+        print("20 ciggies and I'll sharpen it for you.")
+        time.sleep(1)
+        print("Think about it...")
+        time.sleep(2)
+        gamestate["toothbrush"] = 0
+        stock["Sharpen toothbrush"] = 20
+        
+    print(shopguylines[randint(0,len(shopguylines)-1)])
+    time.sleep(1)
+    print()
+    for x in stock:
+        print(f"{x}: {stock[x]} cigarettes")
+        time.sleep(0.5)
+    print(f"You have {gamestate['cigarettes']} cigarettes.")
+    print("Type in an item to inspect it. Type 'stock' to see stock, 'cancel' to cancel.")
+    while True:
+        if t == 1:
+            print("Anything else?")
+            t = 0
+        s = input().capitalize()
+        if s in stock:
+            print(f"{s}: {stockdesc[s]}")
+            print(f"Purchase {s} for {stock[s]} cigarettes? y/n")
+            h = 1
+            while h == 1:
+                l = input().lower()
+                if l == "y":
+                    if s == "Ramen":
+                        if gamestate['cigarettes'] >= stock[s]:
+                            gamestate["ramen"] = gamestate["ramen"] + 1
+                            print("Bought a block of ramen")
+                            gamestate["cigarettes"] = gamestate["cigarettes"] - stock[s]
+                        else:
+                            print("You don't have enough cigarettes.")
+                        h = 0
+                        t = 1
+                        time.sleep(1)
+                    elif s == "Sharpen toothbrush":
+                        if gamestate['cigarettes'] >= stock[s]:
+                            del inventory["toothbrush"]
+                            gamestate["cigarettes"] = gamestate["cigarettes"] - stock[s]
+                            del stock["Sharpen toothbrush"]
+                            inventory["sharpened toothbrush"] = "unequipped"
+                            print("Toothbrush sharpened.")
+                        else:
+                            print("You don't have enough cigarettes.")
+                        time.sleep(1)
+                        t = 1
+                        h = 0
+                    elif s == "Magazine":
+                        if gamestate['cigarettes'] >= stock[s]:
+                            gamestate["mag"] = 1
+                            gamestate["cigarettes"] = gamestate["cigarettes"] - stock[s]
+                            del stock[s]
+                            print("Purchased the Magazine.")
+                        else:
+                            print("You don't have enough cigarettes.")
+                        time.sleep(1)
+                        h = 0
+                        t = 1
+                    elif s == "Lock in a sock":
+                        if gamestate['cigarettes'] >= stock[s]:
+                            inventory["lock in a sock"] = "unequipped"
+                            gamestate["cigarettes"] = gamestate["cigarettes"] - stock[s]
+                            del stock[s]
+                            print(f"Purchased {s}.")
+                        else:
+                            print("You don't have enough cigarettes.")
+                        h = 0
+                        t = 1
+                        time.sleep(1)  
+                elif l == "n":
+                    h = 0
+                    t = 1
+                else:
+                    print("Type y or n.")         
+        elif s == "Cancel" or s == "N" or s == "Leave":
+            print(shopguybyelines[randint(0,len(shopguybyelines)-1)])
+            seenroom["store2"] = 1
+            return None
+        elif s == "Stock":
+            for x in stock:
+                print(f"{x}: {stock[x]} cigarettes")
+                time.sleep(0.2)
+            print(f"You have {gamestate['cigarettes']} cigarettes.")
+        else:
+            print("You can't do that.")
+
 def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
     coordinate["xcoord"] = startX
     coordinate["ycoord"] = startY
@@ -216,11 +436,20 @@ def walk(startX, startY, minX, minY, maxX, maxY, currentroom, floor):
         if currentroom == ((floor * floor) + gamestate["mass"]): #This checks if you're in the top left corner of the map to initiate bossfight, but for now it only takes you to the next floor, mass is the number of floors present on the previous floor.
             if floor == 2:
                 prisonercutscene()
-                battle("Prisoner Westwood", 100, 10, 'prisoner', 3, 2, 1)
+                battle("Prisoner Conway", 100, 10, 'prisoner', 3, 2, 1)
                 if gamestate["victory"] == 1:
                     prisonercutscene2()
                     print(f"You're now on the next level of the game...")
                     render(3)
+                if gamestate["victory"] == 0:
+                    return None
+            if floor == 3:
+                guardcutscene()
+                battle("Officer Westwood", 300, 10, 'officer', 3, 2, 1)
+                if gamestate["victory"] == 1:
+                    stonefree()
+                if gamestate["victory"] == 0:
+                    return None
                     
                 
                 
@@ -301,64 +530,291 @@ def instructions():
 def battle(name, hp, dmg, image, eHlike, eHlim, yourturn):   
     gamestate["ehp"]= hp
     gamestate["edmg"] = dmg
-    gamestate["display"] = image
+    gamestate["display"] = name
     gamestate["your_turn"] = yourturn
+    bleed = 0
     img(image)
     maxhp = hp
+    thrownsock = 0
+    magged = 0
+    handcuffs = 0
+    gamestate["your_turn"] = 1
+    gamestate["battle"] = 1
     print(f"{name} attacks!")
+    if image == "officer":
+        if len(inventory) > 0:
+            if len(inventory) == 1 and "toothbrush" in inventory:
+                pass
+            else:
+                print("I see you've got some items...")
+                time.sleep(2)
+                if "sharpened toothbrush" in inventory and inventory["sharpened toothbrush"] == "equipped":
+                    print("To use your sharpened toothbrush, type 'stab'")
+                    action.append("stab")
+                    time.sleep(1)
+                else:
+                    action.append(None)
+                if "lock in a sock" in inventory and inventory["lock in a sock"] == "equipped":
+                    print("To use your lock in a sock, type 'sock'... To throw it type 'throw'")
+                    action.append("sock")
+                    action.append("throw")
+                    time.sleep(1)
+                else:
+                    action.append(None)
+                    action.append(None)
+                if gamestate["mag"] == 1:
+                    print("To use your magazine, type 'mag'")
+                    time.sleep(1)
+                if gamestate["ramen"] >= 1:
+                    print("To eat your ramen, type 'ramen'")
+                    time.sleep(1)
+                print("Good luck!")
     while gamestate["battle"] == 1:
         while gamestate["your_turn"] == 1:  #Din tur
             if gamestate["ehp"] > 0 and gamestate["php"] > 0 :
+                if handcuffs > 0:
+                    print("You're in handcuffs!")
                 s = input().lower()
-                if s == action[0]:
-                    hit()
-                elif s == action[1]:
-                    check(image)
+                if handcuffs == 0:
+                    if s == action[1]:
+                        jab(name)
+                    elif s == action[0]:
+                        check(image)
+                    elif s == action[2]:
+                        kick(name)
+                    elif s == action[3]:
+                        hook(hp,maxhp,name)
+                    elif s == action[4]:
+                        diebitch(name)
+                    elif s == action[5]:
+                        helpbattle()
+                    elif s == action[6]:
+                        if gamestate["ramen"] > 0:
+                            pheal()
+                            gamestate["ramen"] = gamestate["ramen"] - 1
+                        else:
+                            print("You don't have any ramen...")
+                    elif s == action[7]:
+                        if gamestate["mag"] == 1:
+                            magged = mag(name, magged)
+                        else:
+                            print("You don't have a magazine...")
+                    elif s == action[8]:
+                        bleed = stab(name, bleed)
+                    elif s == action[9]:
+                        if thrownsock == 0:
+                            lockinsock(name)
+                        if thrownsock == 1:
+                            thrownsock = lockinsockretrieve(thrownsock)
+                    elif s == action[10]:
+                        thrownsock = lockinsockthrow(thrownsock, name)
+                    elif s == "stooop":
+                        return None
+                    else:
+                        print(f"You can't do that.")
                 else:
-                    print(f"You can't do that.")
+                    if s == action[2]:
+                        kick(name)
+                    elif s == action[4]:
+                        diebitch(name)
+                    elif s == action[5]:
+                        helpbattle()
+                    elif s == action[6]:
+                        if gamestate["ramen"] > 0:
+                            pheal()
+                            gamestate["ramen"] = gamestate["ramen"] - 1
+                        else:
+                            print("You don't have any ramen...")
+                    else:
+                        print("You can't do that...")
             elif gamestate["ehp"] <= 0:
                 print(f"{name} died!")
+                time.sleep(1)
                 gamestate["victory"] = 1
                 gamestate["battle"] = 0
                 gamestate["your_turn"] = 2
             else:
+                time.sleep(2)
                 print("You died!")
+                time.sleep(1)
+                print("Game Over! Tip: type 'skipcutscene' in the main menu to skip the opening cutscene... ;)")
                 gamestate["victory"] = 0
-                gamestate["battle"] = 0
-                gamestate["your_turn"] = 2
+                return None
+            
         while gamestate["your_turn"] == 0:  #Motståndarens tur
-            if gamestate["php"] > 0 and gamestate["ehp"] > 0:
-                if name == "Prisoner Westwood":
-                    move = randint(0,4)
-                    if move == 0 or move == 1 or move == 2:
-                        ehit(name, eHlike, eHlim)
-                    if move == 4 or move == 3:
-                        gamestate["ehp"] = esmoke(name, hp, maxhp)
-                
-            elif gamestate["ehp"] <= 0:
-                print(f"{name} died!")
-                gamestate["victory"] = 1
-                gamestate["battle"] = 0
-                gamestate["your_turn"] = 2
+            if handcuffs > 0:
+                handcuffs = handcuffs - 1
+            if bleed > 0:
+                j = gamestate["ehp"]
+                gamestate["ehp"] = gamestate["ehp"] - round(maxhp/100*(random.uniform(8,11)))
+                print(f"{name} is bleeding for {j-gamestate['ehp']} dmg!")
+                time.sleep(1)
+                bleed = bleed - 1
+            if magged > 0:
+                print(f"{name} is still distracted!")
+                gamestate["your_turn"] = 1
+                time.sleep(1)
+                magged = magged - 1 
             else:
-                print("You died!")
-                gamestate["victory"] = 0
-                gamestate["battle"] = 0
-                gamestate["your_turn"] = 2
+                if gamestate["php"] > 0 and gamestate["ehp"] > 0:
+                    if name == "Prisoner Conway":
+                        move = randint(0,4)
+                        if move == 0 or move == 1 or move == 2:
+                            ehit(name, eHlike, eHlim)
+                        if move == 4 or move == 3:
+                            gamestate["ehp"] = eheal(name, gamestate["ehp"], maxhp)
+                    else: #TEMPORARYYYYYYYYYYYYYYYYYYYYYY
+                        move = randint(0,6)
+                        if move == 0 or move == 1 or move == 2:
+                            ehit(name, eHlike, eHlim)
+                        if move == 4 or move == 3:
+                            gamestate["ehp"] = copheal(name, gamestate["ehp"], maxhp)
+                        if move == 5:
+                            handcuffs = handcuffs2(name,handcuffs)
+                        if move == 6:
+                            gun(name)
+                elif gamestate["ehp"] <= 0:
+                    time.sleep(2)
+                    print(f"{name} died!")
+                    time.sleep(1)
+                    gamestate["victory"] = 1
+                    gamestate["battle"] = 0
+                    gamestate["your_turn"] = 2
+                else:
+                    time.sleep(2)
+                    print("You died!")
+                    time.sleep(1)
+                    print("Game Over! Tip: type 'skipcutscene' in the main menu to skip the opening cutscene... ;)")
+                    gamestate["victory"] = 0
+                    return None
+                
 #Player actions below
 def hpcheck():
     print ("You:", gamestate["php"], "hp")
-    print (gamestate["display"], ":", gamestate["ehp"], "hp")
+    print (gamestate["display"].capitalize(), ":", gamestate["ehp"], "hp")
 def check(image):
     img(image)
     hpcheck()
-    if gamestate["display"] == "Medusa":
-        print(f"Medusa turned you into stone!")
+def jab(name):
+    print(f"You jab.")
+    time.sleep(1)
+    l = gamestate["ehp"]
+    gamestate["ehp"] = gamestate["ehp"]- round(gamestate["pdmg"] * (random.uniform(1,1.2)))
+    print(f"You jabbed {name} for {l - gamestate['ehp']} hp!")
+    k = randint(0,1)
+    if k == 0:
+        time.sleep(1)
+        print("Your swift movements grant you a second turn...")
+    else:
         gamestate["your_turn"] = 0
-def hit():
-    print(f"You hit")
-    gamestate["ehp"] = gamestate["ehp"]- gamestate["pdmg"] * (randint(10,20) / randint(5,15))
+def hook(hp, maxhp, name):
+    print(f"You go for a hook to the jaw...")
+    time.sleep(1)
+    hookat = random.uniform(0,hp/maxhp)-0.1
+    if hookat <= 0.2:
+        l = gamestate["ehp"]
+        gamestate["ehp"] = gamestate["ehp"] - round(gamestate["pdmg"] * random.uniform(3,3.5))
+        print(f"You hooked {name} in the jaw for {l - gamestate['ehp']} hp!")
+        gamestate["your_turn"] = 0
+    else:
+        print("You missed!")
+        gamestate["your_turn"] = 0
+def kick(name):
+    print(f"You kick!")
+    time.sleep(1)
+    t = randint(0,9)
+    if t == 9:
+        l = gamestate["ehp"]
+        gamestate["ehp"] = gamestate["ehp"] - round(gamestate["pdmg"] * random.uniform(8,10))
+        print(f"You kick {name} in the balls for {l - gamestate['ehp']} hp!")
+        gamestate["your_turn"] = 0
+    else:
+        l = gamestate["ehp"]
+        gamestate["ehp"] = gamestate["ehp"] - round(gamestate["pdmg"] * (random.uniform(1,1.5)))
+        print(f"You barely landed a kick on {name} for {l - gamestate['ehp']} hp!")
+        gamestate["your_turn"] = 0
+def diebitch(name):
+    print("DIE")
+    l = gamestate["ehp"]
+    gamestate["ehp"] = gamestate["ehp"] - 99999999999
+    print(f"Blasted {name} to hell for {l - gamestate['ehp']} dmg...")
+def helpbattle():
+    for x in action:
+        if x in actiondesc:
+            print(f"{x.capitalize()}: {actiondesc[x]}")
+        else:
+            pass
+def pheal(hamount,hp,maxhp, msg):
+    print(msg)
+    time.sleep(1)
+    print(f"You healed {hamount} HP!")
     gamestate["your_turn"] = 0
+    if maxhp > hp + hamount:
+        return hp + hamount
+    else:
+        return maxhp   
+def lockinsock(ename):
+    print("You swing your lock in a sock!")
+    time.sleep(1)
+    c = random.uniform(0,1)
+    l = gamestate["ehp"]
+    if c <= 0.15:
+        gamestate["ehp"] = gamestate["ehp"] - round(gamestate["pdmg"] * (random.uniform(4,5)))
+        print(f"Stunned {ename} for {l - gamestate['ehp']} dmg! You get another turn!")
+    else:
+        gamestate["ehp"] = gamestate["ehp"] - round(gamestate["pdmg"] * (random.uniform(3,4)))
+        print(f"Hit {ename} for {l - gamestate['ehp']} dmg!")
+        gamestate["your_turn"] = 0
+def lockinsockthrow(thrownsock, ename):
+    if thrownsock == 1:
+        print("You don't have your sock! Pick it up by typing 'sock'")
+        return thrownsock
+    else:
+        print("Threw the lock in a sock!")
+        time.sleep(1)
+        thrownsock = 1
+        c = random.uniform(0,1)
+        l = gamestate["ehp"]
+        if c >= 0.7:
+            gamestate["ehp"] = gamestate["ehp"] - round(gamestate["pdmg"] * (random.uniform(5,6)))
+            print(f"Stunned {ename} for {l - gamestate['ehp']} dmg! You get another turn!")
+        elif c >= 0.2:
+            gamestate["ehp"] = gamestate["ehp"] - round(gamestate["pdmg"] * (random.uniform(4,5)))
+            print(f"Hit {ename} for {l - gamestate['ehp']} dmg!")
+            gamestate["your_turn"] = 0
+        else:
+            print("Complete miss!")
+            gamestate["your_turn"] = 0
+        return thrownsock
+def lockinsockretrieve(thrownsock):
+    if thrownsock == 1:
+        print("Picked up the lock in a sock!")
+        thrownsock = 0
+        gamestate["your_turn"] = 0
+        return thrownsock
+    else:
+        print("You already have your sock.")
+def stab(name, bleed):
+    bleed = 3
+    l = gamestate["ehp"]
+    gamestate["ehp"] = gamestate["ehp"] - round(gamestate["pdmg"] * random.uniform(2,3))
+    print(f"You stab {name} for {l - gamestate['ehp']} hp!")
+    time.sleep(1)
+    print(f"Applied bleed!")
+    gamestate["your_turn"] = 0
+    return bleed
+def mag(name, magged):
+    c = random.uniform(0,1)
+    if c >=0.5:
+        print(f"You distracted {name}! You get 2 extra turns!")
+        gamestate["your_turn"] = 1
+        magged = 2
+        return magged
+    else:
+        print(f"{name} is not paying any attention.")
+        gamestate["your_turn"] = 0
+        return magged
+    
 #Enemy Actions Below:
 def ehit(name, hitlikelihood, hitlimit): 
     hitattempt = randint(0,hitlikelihood)
@@ -369,18 +825,41 @@ def ehit(name, hitlikelihood, hitlimit):
         gamestate["php"] = gamestate["php"] - (gamestate["edmg"] + randint(10,40))
         print(f"{name} swings!")
         gamestate["your_turn"] = 1
-def esmoke(name, hp, maxhp):
-    print(f"{name} lights a cigarette!")
+def eheal(name, hp, maxhp):
+    print(f"{name} eats a block of ramen!")
     time.sleep(1)
     print(f"{name} heals 20 HP!")
     gamestate["your_turn"] = 1
-    if maxhp >= hp + 20:
+    if maxhp > hp + 20:
         return hp + 20
     else:
         return maxhp
-    
-        
-        
+def copheal(name, hp, maxhp): #slightly redundant since we have eheal but I can't be bothered to remake it to be able to reuse it better
+    print(f"{name} eats a donut!")
+    time.sleep(1)
+    print(f"{name} heals 50 HP!")
+    gamestate["your_turn"] = 1
+    if maxhp > hp + 50:
+        return hp + 50
+    else:
+        return maxhp
+def gun(name):
+    print(f"{name} fires his gun wildly!")
+    time.sleep(1)
+    l = gamestate["php"]
+    c = random.uniform(0,1)
+    if c >= 0.6:
+        gamestate["php"] = gamestate["php"] - round((gamestate["edmg"] + random.uniform(1.5,2)))
+        print(f"He hits nothing but the stress is bad for your heart! -{l - gamestate['php']} HP!")
+        gamestate["your_turn"] = 1
+    else:
+        print(f"He hits nothing!")
+        gamestate["your_turn"] = 1
+def handcuffs2(name, handcuffs):
+    print(f"{name} lazily puts you in handcuffs! You can only use 'kick' and 'ramen'")
+    handcuffs = 1
+    gamestate["your_turn"] = 1
+    return handcuffs
 def render(floor):
     if floor == 2:
         return f"""
@@ -404,9 +883,6 @@ def render(floor):
 """
     else:
         return f"There is no map..."
-        
-
-#battle("Medusa", 100, 10, "Medusa", 3, 2)
 
 mainmenu()
 
